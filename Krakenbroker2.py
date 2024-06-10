@@ -26,6 +26,7 @@ def get_kraken_signature(urlpath, data, secret):
     postdata = urllib.parse.urlencode(data)
     encoded = (str(data['nonce']) + postdata).encode()
     message = urlpath.encode() + hashlib.sha256(encoded).digest()
+
     mac = hmac.new(base64.b64decode(secret), message, hashlib.sha512)
     sigdigest = base64.b64encode(mac.digest())
     return sigdigest.decode()
@@ -62,14 +63,13 @@ b = kraken_request('/0/private/AddOrder', {
     "ordertype": "limit",
     "type": "buy",
     "volume": 1,
-    "pair": "XBTUSD",
+    "pair": "XETHZUSD",
     "price": 27500
 }, api_key, api_sec)
 
-print(d)
-print(b)
-print(c)
-print(a)
+print(a['result']['XETHZUSD'])
+print(a['result']['XETHZUSD'][-1])
+print(a['result']['XETHZUSD'][-1][-4]) #This is working for the values of closed price.
 
 
 
