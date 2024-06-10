@@ -1,8 +1,5 @@
-import yfinance as yf
 import talib
-import numpy as np
 import pandas as pd
-import datetime
 import requests
 import time
 import creds
@@ -11,10 +8,7 @@ import hashlib
 import hmac
 import base64
 
-startdate = datetime.datetime(2022, 7, 1)
-enddate = datetime.datetime(2024, 1, 1)
 stocks=['ETHUSDT']
-
 api_url = "https://api.kraken.com"
 api_key = creds.api
 api_sec = creds.secret
@@ -36,9 +30,7 @@ def kraken_request(uri_path, data, api_key, api_sec):
     return req
 
 class Strategy:
-    def __init__(self, ticker, startdate, enddate, capital):
-        self.startdate = startdate
-        self.enddate = enddate
+    def __init__(self, ticker, capital):
         self.capital = capital
         self.ticker = ticker
         self.data = None
@@ -107,7 +99,7 @@ class Strategy:
 def main():
     while True:
         for stock in stocks:
-            strategy = Strategy(stock, startdate, enddate, 10000)
+            strategy = Strategy(stock, 10000)
             strategy.OHLCdata()
             strategy.add_indicators()
             strategy.generate_signals()

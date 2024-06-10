@@ -24,14 +24,14 @@ class MACDPATTERN(Strategy):
         #the iloc function isn't working
         if (self.EMA200[-1] > self.data.Close[-1] and 
             self.MACD[-1] < self.MACDSignal[-1] and 
-            self.data.Close[-3] < self.data.Close[-2] < self.data.Close[-1]):
-            if (self.Hammer[-3] != 0 or self.MorningStar[-3] != 0):
+            self.data.Close[-2] < self.data.Close[-1] < self.data.Close[0]):
+            if (self.Hammer[-2] != 0 or self.MorningStar[-2] != 0 or self.EveningStar[-2] != 0 or self.ShootingStar[-2] != 0):
                 self.position.close()
                 self.buy(sl=(self.stlo * self.data.Close[-1]) / 100, tp=(self.tkpr * self.data.Close[-1]) / 100)
         elif (self.EMA200[-1] < self.data.Close[-1] and 
               self.MACD[-1] > self.MACDSignal[-1] and 
-              self.data.Close[-3] > self.data.Close[-2] > self.data.Close[-1]):
-            if (self.EveningStar[-3] != 0 or self.ShootingStar[-3] != 0):
+              self.data.Close[-2] > self.data.Close[-1] > self.data.Close[0]):
+            if (self.EveningStar[-2] != 0 or self.ShootingStar[-2] != 0 or self.Hammer[-2] != 0 or self.MorningStar[-2] != 0):
                 self.position.close()
                 self.sell(sl=(self.tkpr * self.data.Close[-1]) / 100, tp=(self.stlo * self.data.Close[-1]) / 100)
 
