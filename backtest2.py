@@ -1,42 +1,53 @@
 from backtesting import Backtest, Strategy
 from backtesting.test import GOOG
 import talib
-import numpy as np
-import pandas as pd
 
 class MACDPATTERN(Strategy):
     stlo = 95  
     tkpr = 105  
 
-    def __init__(self):
-        self.data['EMA200'] = self.I(talib.EMA, self.data.Close, timeperiod=200)
-        self.data['Hammer'] = self.I(lambda o, h, l, c: talib.CDLHAMMER(o, h, l, c), 
-                             self.data['Open'], self.data['High'], self.data['Low'], self.data['Close'])
-        self.data['MorningStar'] = self.I(lambda o, h, l, c: talib.CDLMORNINGSTAR(o, h, l, c), 
-                                  self.data['Open'], self.data['High'], self.data['Low'], self.data['Close'])
-        self.data['EveningStar'] = self.I(lambda o, h, l, c: talib.CDLEVENINGSTAR(o, h, l, c), 
-                                  self.data['Open'], self.data['High'], self.data['Low'], self.data['Close'])
-        self.data['ShootingStar'] = self.I(lambda o, h, l, c: talib.CDLSHOOTINGSTAR(o, h, l, c), 
-                                   self.data['Open'], self.data['High'], self.data['Low'], self.data['Close'])
-        self.data['MACD'], self.data['MACDSignal'], _ = self.I(talib.MACD, self.data.Close, fastperiod=12, slowperiod=26)
+    def init(self):
+        self.EMA200 = self.I(talib.EMA, self.data.Close, timeperiod=200)
+        self.Hammer = self.I(lambda o, h, l, c: talib.CDLHAMMER(o, h, l, c), 
+                             self.data.Open, self.data.High, self.data.Low, self.data.Close)
+        self.MorningStar = self.I(lambda o, h, l, c: talib.CDLMORNINGSTAR(o, h, l, c), 
+                                  self.data.Open, self.data.High, self.data.Low, self.data.Close)
+        self.EveningStar = self.I(lambda o, h, l, c: talib.CDLEVENINGSTAR(o, h, l, c), 
+                                  self.data.Open, self.data.High, self.data.Low, self.data.Close)
+        self.ShootingStar = self.I(lambda o, h, l, c: talib.CDLSHOOTINGSTAR(o, h, l, c), 
+                                   self.data.Open, self.data.High, self.data.Low, self.data.Close)
+        self.MACD, self.MACDSignal, _ = self.I(talib.MACD, self.data.Close, fastperiod=12, slowperiod=26)
 
     def next(self):
-        if (self.data['EMA200'] > self.data['Close'] and self.data['MACD'] < self.data['MACDSignal'] and self.data['Close'].iloc[-2]<self.data['Close'].iloc[-1]<self.data['Close'].iloc[0]):
-            if (self.data['Hammer'].iloc[-3] != 0 or self.data['MorningStar'].iloc[-3] != 0):
+        if len(self.data.Close) < 4:  
+            return -1
+        #the iloc function isn't working
+        if (self.EMA200[-1] > self.data.Close[-1] and 
+            self.MACD[-1] < self.MACDSignal[-1] and 
+            self.data.Close[-2] < self.data.Close[-1] < self.data.Close[0]):
+            if (self.Hammer[-2] != 0 or self.MorningStar[-2] != 0 or self.EveningStar[-2] != 0 or self.ShootingStar[-2] != 0):
                 self.position.close()
-                self.buy(sl=(self.stlo * self.data.Close) / 100, tp=(self.tkpr * self.data.Close) / 100)
-        elif (self.data['EMA200'] < self.data['Close'] and self.data['MACD'] > self.data['MACDSignal'] and self.data['Close'].iloc[-2]>self.data['Close'].iloc[-1]>self.data['Close'].iloc[0]):
-            if (self.data['EveningStar'].iloc[-3] != 0 or self.data['ShootingStar'].iloc[-3] != 0):
+                self.buy(sl=(self.stlo * self.data.Close[-1]) / 100, tp=(self.tkpr * self.data.Close[-1]) / 100)
+        elif (self.EMA200[-1] < self.data.Close[-1] and 
+              self.MACD[-1] > self.MACDSignal[-1] and 
+              self.data.Close[-2] > self.data.Close[-1] > self.data.Close[0]):
+            if (self.EveningStar[-2] != 0 or self.ShootingStar[-2] != 0 or self.Hammer[-2] != 0 or self.MorningStar[-2] != 0):
                 self.position.close()
-                self.sell(sl=(self.tkpr * self.data.Close) / 100, tp=(self.stlo * self.data.Close) / 100)
+                self.sell(sl=(self.tkpr * self.data.Close[-1]) / 100, tp=(self.stlo * self.data.Close[-1]) / 100)
 
 def main():
     bt = Backtest(GOOG, MACDPATTERN, cash=10000)
     stats = bt.run()
     print(stats)
     bt.plot()
+    st=bt.optimize(
+        stlo=range(90, 99, 1),
+        tkpr=range(101, 110, 1),
+        maximize='Win Rate [%]'
+    )
+    print(st)
 
 if __name__ == "__main__":
     main()
 
-#the changes to be made is to compare the third last candle
+#working but not sure how properly

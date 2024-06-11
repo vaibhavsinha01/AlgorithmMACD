@@ -1,8 +1,6 @@
 from backtesting import Backtest, Strategy
 from backtesting.test import GOOG
 import talib
-import numpy as np
-import pandas as pd
 
 class MACDPATTERN(Strategy):
     stlo = 95  
@@ -21,14 +19,19 @@ class MACDPATTERN(Strategy):
         self.MACD, self.MACDSignal, _ = self.I(talib.MACD, self.data.Close, fastperiod=12, slowperiod=26)
 
     def next(self):
-        if (self.EMA200 > self.data.Close and self.MACD < self.MACDSignal):
-            if (self.Hammer != 0 or self.MorningStar != 0):
+        if len(self.data.Close) < 4:  
+            return -1
+        #the iloc function isn't working
+        if (self.EMA200[-1] > self.data.Close[-1] and 
+            self.MACD[-1] > self.MACDSignal[-1]):
+            if (self.Hammer[-2] != 0 or self.MorningStar[-2] != 0 or self.EveningStar[-2] != 0 or self.ShootingStar[-2] != 0):
                 self.position.close()
-                self.buy(sl=(self.stlo * self.data.Close) / 100, tp=(self.tkpr * self.data.Close) / 100)
-        elif (self.EMA200 < self.data.Close and self.MACD > self.MACDSignal):
-            if (self.EveningStar != 0 or self.ShootingStar != 0):
+                self.buy(sl=(self.stlo * self.data.Close[-1]) / 100, tp=(self.tkpr * self.data.Close[-1]) / 100)
+        elif (self.EMA200[-1] < self.data.Close[-1] and 
+              self.MACD[-1] < self.MACDSignal[-1]):
+            if (self.EveningStar[-2] != 0 or self.ShootingStar[-2] != 0 or self.Hammer[-2] != 0 or self.MorningStar[-2] != 0):
                 self.position.close()
-                self.sell(sl=(self.tkpr * self.data.Close) / 100, tp=(self.stlo * self.data.Close) / 100)
+                self.sell(sl=(self.tkpr * self.data.Close[-1]) / 100, tp=(self.stlo * self.data.Close[-1]) / 100)
 
 def main():
     bt = Backtest(GOOG, MACDPATTERN, cash=10000)
@@ -44,3 +47,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+#working but not sure how properly

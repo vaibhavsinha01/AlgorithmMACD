@@ -72,13 +72,13 @@ class Strategy:
     def generate_signals(self):
         self.data['Signal'] = 0
         for i in range(300, len(self.data)):
-            if (float(self.data['Close'].iloc[i]) > float(self.data['EMA200'].iloc[i]) and self.data['MACD'].iloc[i] < self.data['MACDSignal'].iloc[i]):
+            if (float(self.data['Close'].iloc[i]) > float(self.data['EMA200'].iloc[i]) and self.data['MACD'].iloc[i] > self.data['MACDSignal'].iloc[i]):
                 if (self.data['Hammer'].iloc[i-3] != 0 or self.data['MorningStar'].iloc[i-3] != 0) and \
                    (self.data['Close'].iloc[i-3] < self.data['Close'].iloc[i-2] or 
                     self.data['Close'].iloc[i-2] < self.data['Close'].iloc[i-1] or 
                     self.data['Close'].iloc[i-1] < self.data['Close'].iloc[i]):
                     self.data.at[i, 'Signal'] = 1
-            elif (float(self.data['Close'].iloc[i]) < float(self.data['EMA200'].iloc[i]) and self.data['MACD'].iloc[i] > self.data['MACDSignal'].iloc[i]):
+            elif (float(self.data['Close'].iloc[i]) < float(self.data['EMA200'].iloc[i]) and self.data['MACD'].iloc[i] < self.data['MACDSignal'].iloc[i]):
                 if (self.data['EveningStar'].iloc[i] != 0 or self.data['ShootingStar'].iloc[i] != 0) and \
                    (self.data['Close'].iloc[i-3] > self.data['Close'].iloc[i-2] or 
                     self.data['Close'].iloc[i-2] > self.data['Close'].iloc[i-1] or 

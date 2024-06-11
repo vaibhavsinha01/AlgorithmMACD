@@ -52,12 +52,8 @@ def cancel_orders():
     "txid": "OG5V2Y-RYKVL-DT3V3B"
 }, api_key, api_sec)
     return resp.json()
-
-d=account_balance()
-a=OHLCdata()
-c=cancel_all_orders()
-
-b = kraken_request('/0/private/AddOrder', {
+def place_order():
+    b = kraken_request('/0/private/AddOrder', {
     "nonce": str(int(1000*time.time())),
     "ordertype": "limit",
     "type": "buy",
@@ -65,11 +61,19 @@ b = kraken_request('/0/private/AddOrder', {
     "pair": "XBTUSD",
     "price": 27500
 }, api_key, api_sec)
+    return b.json()
+    
 
-print(d)
-print(b)
-print(c)
-print(a)
+
+t=place_order()
+d=account_balance()
+a=OHLCdata()
+c=cancel_all_orders()
+print(t)
+
+
+
+
 
 
 

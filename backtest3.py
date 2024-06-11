@@ -40,6 +40,12 @@ def main():
     stats = bt.run()
     print(stats)
     bt.plot()
+    st=bt.optimize(
+        stlo=range(90, 99, 1),
+        tkpr=range(101, 110, 1),
+        maximize='Win Rate [%]'
+    )
+    print(st)
 
 if __name__ == "__main__":
     main()
